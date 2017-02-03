@@ -1,0 +1,15 @@
+{
+  "name": "rblab-vr",
+  "version": "1.0.0",
+  "description": "VR experiments",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "reload -b"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "reload": "^1.1.1"
+  }
+}
