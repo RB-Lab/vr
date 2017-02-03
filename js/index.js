@@ -39,7 +39,7 @@
 	window.addEventListener('mousemove', (e) => {
 		if (lastXY.x !== undefined && lastXY.y !== undefined && spaceFlag) {
 			box.translateX((lastXY.x - e.clientX) * 0.03);
-			box.translateY((lastXY.y - e.clientY) * 0.03);
+			box.translateZ((lastXY.y - e.clientY) * 0.03);
 		}
 		lastXY.x = e.clientX;
 		lastXY.y = e.clientY;
@@ -51,6 +51,7 @@
 	env.scene.add(drawLine([10, 11, -1], [10, 11, 1]));
 	env.scene.add(new THREE.HemisphereLight(0x999999, 0x000000, 0.6));
 	env.scene.add(box);
+	env.scene.add(drawSkyBox());
 	animate();
 
 	function setOrientationControls(e) {
@@ -83,7 +84,7 @@
 
 	function drawLandscape(renderer) {
 		const texture = THREE.ImageUtils.loadTexture(
-			'textures/patterns/checker.png'
+			'textures/patterns/sand.png'
 		);
 		texture.wrapS = THREE.RepeatWrapping;
 		texture.wrapT = THREE.RepeatWrapping;
@@ -103,6 +104,34 @@
 		const landscapeMesh = new THREE.Mesh(geometry, material);
 		landscapeMesh.rotation.x = -Math.PI / 2;
 		return landscapeMesh;
+	}
+
+	function drawSkyBox() {
+		// Load the skybox images and create list of materials
+		const materials = [
+			createMaterial('textures/skybox/skyX55+x.png'), // right
+			createMaterial('textures/skybox/skyX55-x.png'), // left
+			createMaterial('textures/skybox/skyX55+y.png'), // top
+			createMaterial('textures/skybox/skyX55-y.png'), // bottom
+			createMaterial('textures/skybox/skyX55+z.png'), // back
+			createMaterial('textures/skybox/skyX55-z.png')  // front
+		];
+
+		// Create a large cube
+		const mesh = new THREE.Mesh(
+			new THREE.BoxGeometry(800, 800, 800, 1, 1, 1),
+			new THREE.MeshFaceMaterial(materials)
+		);
+
+		// Set the x scale to be -1, this will turn the cube inside out
+		mesh.scale.set(-1, 1, 1);
+		return mesh;
+	}
+
+	function createMaterial(path) {
+		const texture = THREE.ImageUtils.loadTexture(path);
+		const material = new THREE.MeshBasicMaterial({map: texture, overdraw: 0.5});
+		return material;
 	}
 
 	function drawLine(a, b) {
