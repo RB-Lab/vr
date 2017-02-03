@@ -1,130 +1,144 @@
-var camera, scene, renderer;
-var effect, controls;
-var element, container;
+(function() {
+	const env = {
+		clock: new THREE.Clock(),
+		camera: new THREE.PerspectiveCamera(90, 1, 0.001, 700),
+		scene: new THREE.Scene(),
+		renderer: new THREE.WebGLRenderer(),
+		effect: null,
+		controls: null,
+		element: null,
+		container: null,
+		render: null,
+		isMobile: checkForMobile()
+	};
 
-var clock = new THREE.Clock();
-
-init();
-animate();
-
-function init() {
-	renderer = new THREE.WebGLRenderer();
-	element = renderer.domElement;
-	container = document.getElementById('example');
-	container.appendChild(element);
-
-	effect = new THREE.StereoEffect(renderer);
-
-	scene = new THREE.Scene();
-
-	camera = new THREE.PerspectiveCamera(90, 1, 0.001, 700);
-	camera.position.set(0, 10, 0);
-	scene.add(camera);
-
-	controls = new THREE.OrbitControls(camera, element);
-	controls.target.set(
-		camera.position.x + 0.1,
-		camera.position.y,
-		camera.position.z
-	);
-	controls.noZoom = true;
-	controls.noPan = true;
+	env.element = env.renderer.domElement;
+	env.container = document.getElementById('example');
+	env.container.appendChild(env.element);
+	if (env.isMobile) {
+		env.effect = new THREE.StereoEffect(env.renderer);
+		env.render = () => env.effect.render(env.scene, env.camera);
+		window.addEventListener('deviceorientation', setOrientationControls,true);
+	}
+	env.camera.position.set(0, 10, 0);
+	env.controls = createOrbitControls(env.camera, env.element);
+	window.addEventListener('resize', resize, false);
+	setTimeout(resize, 1);
+	env.scene.add(env.camera);
+	env.scene.add(drawLandscape(env.renderer));
+	env.scene.add(drawLine([10, 10, 0], [10, 12, 0]));
+	env.scene.add(drawLine([10, 11, -1], [10, 11, 1]));
+	env.scene.add(new THREE.HemisphereLight(0x999999, 0x000000, 0.6));
+	animate();
 
 	function setOrientationControls(e) {
 		if (!e.alpha) {
 			return;
 		}
-
-		controls = new THREE.DeviceOrientationControls(camera, true);
-		controls.connect();
-		controls.update();
-
+		env.controls = createOrientationControls(env.camera);
 		element.addEventListener('click', fullscreen, false);
-
 		window.removeEventListener('deviceorientation', setOrientationControls, true);
 	}
-	window.addEventListener('deviceorientation', setOrientationControls, true);
 
-
-	var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
-	scene.add(light);
-
-	var texture = THREE.ImageUtils.loadTexture(
-		'textures/patterns/checker.png'
-	);
-	texture.wrapS = THREE.RepeatWrapping;
-	texture.wrapT = THREE.RepeatWrapping;
-	texture.repeat = new THREE.Vector2(90, 90);
-	texture.anisotropy = renderer.getMaxAnisotropy();
-
-	var material = new THREE.MeshPhongMaterial({
-		color: 0xffffff,
-		specular: 0xffffff,
-		shininess: 20,
-		shading: THREE.FlatShading,
-		map: texture
-	});
-
-	var geometry = new THREE.PlaneGeometry(1000, 1000);
-
-	var mesh = new THREE.Mesh(geometry, material);
-	mesh.rotation.x = -Math.PI / 2;
-	scene.add(mesh);
-	scene.add(drawLine());
-
-	window.addEventListener('resize', resize, false);
-	setTimeout(resize, 1);
-}
-
-function drawLine() {
-	var material = new THREE.LineBasicMaterial({ color: 0x0000ff });
-	var geometry = new THREE.Geometry();
-	geometry.vertices.push(new THREE.Vector3(0, 0, 6));
-	geometry.vertices.push(new THREE.Vector3(0, 10, 0));
-	geometry.vertices.push(new THREE.Vector3(10, 0, 6));
-	var line = new THREE.Line(geometry, material);
-	window.line = line;
-	return line;
-}
-
-function resize() {
-	var width = container.offsetWidth;
-	var height = container.offsetHeight;
-
-	camera.aspect = width / height;
-	camera.updateProjectionMatrix();
-
-	renderer.setSize(width, height);
-	effect.setSize(width, height);
-}
-
-function update(dt) {
-	resize();
-
-	camera.updateProjectionMatrix();
-
-	controls.update(dt);
-}
-
-function render(dt) {
-	effect.render(scene, camera);
-}
-
-function animate(t) {
-	requestAnimationFrame(animate);
-
-	update(clock.getDelta());
-	render(clock.getDelta());
-}
-
-function fullscreen() {
-	if (container.requestFullscreen) {
-		container.requestFullscreen();
-	} else if (container.msRequestFullscreen) {
-		container.msRequestFullscreen();
-	} else if (container.mozRequestFullScreen) {
-		container.mozRequestFullScreen();
-	} else if (container.webkitRequestFullscreen) {
-		container.webkitRequestFullscreen();
+	function createOrbitControls(camera, element) {
+		const controls = new THREE.OrbitControls(camera, element);
+		controls.target.set(
+			camera.position.x + 1,
+			camera.position.y,
+			camera.position.z
+		);
+		controls.noZoom = true;
+		controls.noPan = true;
+		return controls;
 	}
-}
+
+	function createOrientationControls(camera) {
+		const controls = new THREE.DeviceOrientationControls(camera, true);
+		controls.connect();
+		controls.update();
+		return controls;
+	}
+
+	function drawLandscape(renderer) {
+		const texture = THREE.ImageUtils.loadTexture(
+			'textures/patterns/checker.png'
+		);
+		texture.wrapS = THREE.RepeatWrapping;
+		texture.wrapT = THREE.RepeatWrapping;
+		texture.repeat = new THREE.Vector2(90, 90);
+		texture.anisotropy = renderer.getMaxAnisotropy();
+
+		const material = new THREE.MeshPhongMaterial({
+			color: 0xffffff,
+			specular: 0xffffff,
+			shininess: 20,
+			shading: THREE.FlatShading,
+			map: texture
+		});
+
+		const geometry = new THREE.PlaneGeometry(1000, 1000);
+
+		const landscapeMesh = new THREE.Mesh(geometry, material);
+		landscapeMesh.rotation.x = -Math.PI / 2;
+		return landscapeMesh;
+	}
+
+	function drawLine(a, b) {
+		const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+		const geometry = new THREE.Geometry();
+		const line = new THREE.Line(geometry, material);
+		geometry.vertices.push(new THREE.Vector3(...a));
+		geometry.vertices.push(new THREE.Vector3(...b));
+		return line;
+	}
+
+	function checkForMobile() {
+		return /android/i.test(navigator.userAgent);
+	}
+
+	function resize() {
+		var width = env.container.offsetWidth;
+		var height = env.container.offsetHeight;
+
+		env.camera.aspect = width / height;
+		env.camera.updateProjectionMatrix();
+
+		env.renderer.setSize(width, height);
+		if(env.effect){
+			env.effect.setSize(width, height);
+		}
+	}
+
+	function update(dt) {
+		resize();
+		env.camera.updateProjectionMatrix();
+		env.controls.update(dt);
+	}
+
+	function render(dt) {
+		if(env.effect){
+			env.effect.render(env.scene, env.camera);
+		} else {
+			env.renderer.render(env.scene, env.camera);
+		}
+	}
+
+	function animate(t) {
+		requestAnimationFrame(animate);
+		update(env.clock.getDelta());
+		render(env.clock.getDelta());
+	}
+
+	function fullscreen() {
+		if (env.container.requestFullscreen) {
+			env.container.requestFullscreen();
+		} else if (env.container.msRequestFullscreen) {
+			env.container.msRequestFullscreen();
+		} else if (env.container.mozRequestFullScreen) {
+			env.container.mozRequestFullScreen();
+		} else if (env.container.webkitRequestFullscreen) {
+			env.container.webkitRequestFullscreen();
+		}
+	}
+})();
+
