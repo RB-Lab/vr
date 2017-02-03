@@ -1,7 +1,7 @@
 (function() {
 	const env = {
 		clock: new THREE.Clock(),
-		camera: new THREE.PerspectiveCamera(90, 1, 0.001, 700),
+		camera: new THREE.PerspectiveCamera(45, 9 / 16, 1, 100),
 		scene: new THREE.Scene(),
 		renderer: new THREE.WebGLRenderer(),
 		effect: null,
@@ -11,6 +11,7 @@
 		render: null,
 		isMobile: checkForMobile()
 	};
+	let spaceFlag = false;
 
 	env.element = env.renderer.domElement;
 	env.container = document.getElementById('example');
@@ -18,17 +19,38 @@
 	if (env.isMobile) {
 		env.effect = new THREE.StereoEffect(env.renderer);
 		env.render = () => env.effect.render(env.scene, env.camera);
-		window.addEventListener('deviceorientation', setOrientationControls,true);
+		window.addEventListener('deviceorientation', setOrientationControls, true);
 	}
 	env.camera.position.set(0, 10, 0);
 	env.controls = createOrbitControls(env.camera, env.element);
 	window.addEventListener('resize', resize, false);
+	window.addEventListener('keydown', (e) => {
+		if (e.keyCode === 32) {
+			spaceFlag = true;
+		}
+	});
+	window.addEventListener('keyup', (e) => {
+		if (e.keyCode === 32) {
+			spaceFlag = false;
+		}
+	});
+	const box = drawBox();
+	const lastXY = {x: 0, y: 0};
+	window.addEventListener('mousemove', (e) => {
+		if (lastXY.x !== undefined && lastXY.y !== undefined && spaceFlag) {
+			box.translateX((lastXY.x - e.clientX) * 0.03);
+			box.translateZ((lastXY.y - e.clientY) * 0.03);
+		}
+		lastXY.x = e.clientX;
+		lastXY.y = e.clientY;
+	});
 	setTimeout(resize, 1);
 	env.scene.add(env.camera);
 	env.scene.add(drawLandscape(env.renderer));
 	env.scene.add(drawLine([10, 10, 0], [10, 12, 0]));
 	env.scene.add(drawLine([10, 11, -1], [10, 11, 1]));
 	env.scene.add(new THREE.HemisphereLight(0x999999, 0x000000, 0.6));
+	env.scene.add(box);
 	animate();
 
 	function setOrientationControls(e) {
@@ -84,7 +106,7 @@
 	}
 
 	function drawLine(a, b) {
-		const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+		const material = new THREE.LineBasicMaterial({color: 0x00ff00});
 		const geometry = new THREE.Geometry();
 		const line = new THREE.Line(geometry, material);
 		geometry.vertices.push(new THREE.Vector3(...a));
@@ -92,19 +114,39 @@
 		return line;
 	}
 
+	function drawBox() {
+		const geometry = new THREE.BoxGeometry(3, 3, 3);
+		const texture = THREE.ImageUtils.loadTexture(
+			'textures/patterns/checker.png'
+		);
+
+		const material = new THREE.MeshPhongMaterial({
+			color: 0xffffff,
+			specular: 0xffffff,
+			shininess: 20,
+			shading: THREE.FlatShading,
+			map: texture
+		});
+		const box = new THREE.Mesh(geometry, material);
+		window.box = box;
+		box.translateOnAxis(new THREE.Vector3(10, 5, 0), 1);
+		box.rotateY(15);
+		return box;
+	}
+
 	function checkForMobile() {
 		return /android/i.test(navigator.userAgent);
 	}
 
 	function resize() {
-		var width = env.container.offsetWidth;
-		var height = env.container.offsetHeight;
+		const width = env.container.offsetWidth;
+		const height = env.container.offsetHeight;
 
 		env.camera.aspect = width / height;
 		env.camera.updateProjectionMatrix();
 
 		env.renderer.setSize(width, height);
-		if(env.effect){
+		if (env.effect) {
 			env.effect.setSize(width, height);
 		}
 	}
@@ -115,15 +157,15 @@
 		env.controls.update(dt);
 	}
 
-	function render(dt) {
-		if(env.effect){
+	function render() {
+		if (env.effect) {
 			env.effect.render(env.scene, env.camera);
 		} else {
 			env.renderer.render(env.scene, env.camera);
 		}
 	}
 
-	function animate(t) {
+	function animate() {
 		requestAnimationFrame(animate);
 		update(env.clock.getDelta());
 		render(env.clock.getDelta());
