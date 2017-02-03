@@ -46,12 +46,13 @@
 	});
 	setTimeout(resize, 1);
 	env.scene.add(env.camera);
+	env.scene.add(drawStar());
+	env.scene.add(new THREE.AmbientLight(0x505050));
+	env.scene.add(drawSkyBox());
 	env.scene.add(drawLandscape(env.renderer));
 	env.scene.add(drawLine([10, 10, 0], [10, 12, 0]));
 	env.scene.add(drawLine([10, 11, -1], [10, 11, 1]));
-	env.scene.add(new THREE.HemisphereLight(0x999999, 0x000000, 0.6));
 	env.scene.add(box);
-	env.scene.add(drawSkyBox());
 	animate();
 
 	function setOrientationControls(e) {
@@ -82,6 +83,13 @@
 		return controls;
 	}
 
+	function drawStar() {
+		const light = new THREE.PointLight(0xffffff, 1.4, 2800);
+		light.position.set(300, 300, -900);
+		window.star = light;
+		return light;
+	}
+
 	function drawLandscape(renderer) {
 		const texture = THREE.ImageUtils.loadTexture(
 			'textures/patterns/sand.png'
@@ -91,7 +99,7 @@
 		texture.repeat = new THREE.Vector2(90, 90);
 		texture.anisotropy = renderer.getMaxAnisotropy();
 
-		const material = new THREE.MeshPhongMaterial({
+		const material = new THREE.MeshLambertMaterial({
 			color: 0xffffff,
 			specular: 0xffffff,
 			shininess: 20,
@@ -116,13 +124,11 @@
 			createMaterial('textures/skybox/skyX55+z.png'), // back
 			createMaterial('textures/skybox/skyX55-z.png')  // front
 		];
-
 		// Create a large cube
 		const mesh = new THREE.Mesh(
 			new THREE.BoxGeometry(800, 800, 800, 1, 1, 1),
 			new THREE.MeshFaceMaterial(materials)
 		);
-
 		// Set the x scale to be -1, this will turn the cube inside out
 		mesh.scale.set(-1, 1, 1);
 		return mesh;
@@ -156,11 +162,10 @@
 			shading: THREE.FlatShading,
 			map: texture
 		});
-		const box = new THREE.Mesh(geometry, material);
-		window.box = box;
-		box.translateOnAxis(new THREE.Vector3(10, 5, 0), 1);
-		box.rotateY(15);
-		return box;
+		const mesh = new THREE.Mesh(geometry, material);
+		mesh.translateOnAxis(new THREE.Vector3(10, 5, 0), 1);
+		mesh.rotateY(15);
+		return mesh;
 	}
 
 	function checkForMobile() {
