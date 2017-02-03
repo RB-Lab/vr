@@ -36,7 +36,7 @@
 			return;
 		}
 		env.controls = createOrientationControls(env.camera);
-		element.addEventListener('click', fullscreen, false);
+		env.element.addEventListener('click', fullscreen, false);
 		window.removeEventListener('deviceorientation', setOrientationControls, true);
 	}
 
@@ -141,4 +141,3 @@
 		}
 	}
 })();
-
