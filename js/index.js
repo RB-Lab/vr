@@ -1,7 +1,7 @@
 (function() {
 	const env = {
 		clock: new THREE.Clock(),
-		camera: new THREE.PerspectiveCamera(45, 9 / 16, 1, 100),
+		camera: new THREE.PerspectiveCamera(90, 1, 0.001, 700),
 		scene: new THREE.Scene(),
 		renderer: new THREE.WebGLRenderer(),
 		effect: null,
@@ -39,7 +39,7 @@
 	window.addEventListener('mousemove', (e) => {
 		if (lastXY.x !== undefined && lastXY.y !== undefined && spaceFlag) {
 			box.translateX((lastXY.x - e.clientX) * 0.03);
-			box.translateZ((lastXY.y - e.clientY) * 0.03);
+			box.translateY((lastXY.y - e.clientY) * 0.03);
 		}
 		lastXY.x = e.clientX;
 		lastXY.y = e.clientY;
