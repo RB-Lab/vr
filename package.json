@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "reload -b",
-    "deploy": "scp -r js textures index.html btm@e.rblab.net:/home/btm/rb-lab/demos/vr"
+    "deploy-full": "scp -r js textures index.html btm@e.rblab.net:/home/btm/rb-lab/demos/vr",
+    "deploy": "scp js/index.js btm@e.rblab.net:/home/btm/rb-lab/demos/vr/js"
   },
   "author": "",
   "license": "ISC",
