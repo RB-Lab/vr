@@ -5,9 +5,15 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "reload -b",
+    "prestart": "npm run prepare-build",
+    "start": "webpack-dev-server --config wp-config.js",
+    "prepare-build": "rm -rf build && mkdir build && cp -r assets/* build/",
+    "prebuild": "npm run prepare-build",
+    "build": "webpack --config wp-config.js",
+    "predeploy": "npm run build",
+    "predeploy-full": "npm run build",
     "deploy-full": "scp -r js textures index.html btm@e.rblab.net:/home/btm/rb-lab/demos/vr",
-    "deploy": "scp js/index.js btm@e.rblab.net:/home/btm/rb-lab/demos/vr/js"
+    "deploy": "scp build/bundle.js btm@e.rblab.net:/home/btm/rb-lab/demos/vr/build"
   },
   "author": "",
   "license": "ISC",
@@ -15,6 +21,11 @@
     "eslint": "^3.14.1",
     "eslint-config-airbnb-base": "^11.0.1",
     "eslint-plugin-import": "^2.2.0",
-    "reload": "^1.1.1"
+    "webpack-dev-server": "^2.3.0"
+  },
+  "dependencies": {
+    "babel-core": "^6.22.1",
+    "babel-loader": "^6.2.10",
+    "webpack": "^2.2.1"
   }
 }
