@@ -12,8 +12,8 @@
     "build": "webpack --config wp-config.js",
     "predeploy": "npm run build",
     "predeploy-full": "npm run build",
-    "deploy-full": "scp -r js textures index.html btm@e.rblab.net:/home/btm/rb-lab/demos/vr",
-    "deploy": "scp build/bundle.js btm@e.rblab.net:/home/btm/rb-lab/demos/vr/build"
+    "deploy-full": "scp -r build/* btm@e.rblab.net:/home/btm/rb-lab/demos/vr",
+    "deploy": "scp build/bundle.js btm@e.rblab.net:/home/btm/rb-lab/demos/vr"
   },
   "author": "",
   "license": "ISC",
