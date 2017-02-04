@@ -10,7 +10,6 @@ const env = {
 	render: null,
 	isMobile: checkForMobile()
 };
-let spaceFlag = false;
 
 function startVR() {
 	env.element = env.renderer.domElement;
@@ -24,36 +23,25 @@ function startVR() {
 	env.camera.position.set(0, 10, 0);
 	env.controls = createOrbitControls(env.camera, env.element);
 	window.addEventListener('resize', resize, false);
-	window.addEventListener('keydown', (e) => {
-		if (e.keyCode === 32) {
-			spaceFlag = true;
-		}
-	});
-	window.addEventListener('keyup', (e) => {
-		if (e.keyCode === 32) {
-			spaceFlag = false;
-		}
-	});
-	const box = drawBox();
-	const lastXY = {x: 0, y: 0};
-	window.addEventListener('mousemove', (e) => {
-		if (lastXY.x !== undefined && lastXY.y !== undefined && spaceFlag) {
-			box.translateX((lastXY.x - e.clientX) * 0.03);
-			box.translateZ((lastXY.y - e.clientY) * 0.03);
-		}
-		lastXY.x = e.clientX;
-		lastXY.y = e.clientY;
-	});
 	setTimeout(resize, 1);
 	env.scene.add(env.camera);
-	env.scene.add(drawStar());
-	env.scene.add(new THREE.AmbientLight(0x505050));
-	env.scene.add(drawSkyBox());
-	env.scene.add(drawLandscape(env.renderer));
-	env.scene.add(drawLine([10, 10, 0], [10, 12, 0]));
-	env.scene.add(drawLine([10, 11, -1], [10, 11, 1]));
-	env.scene.add(box);
 	animate();
+
+	return {
+		/**
+		 * @param {Array<Object3D>|Object3D} objects
+		 */
+		addToScene(objects) {
+			if (Array.isArray(objects)) {
+				objects.forEach((obj) => {
+					env.scene.add(obj);
+				});
+			} else {
+				env.scene.add(objects);
+			}
+		},
+		anisotropy: env.renderer.getMaxAnisotropy()
+	};
 }
 
 function setOrientationControls(e) {
@@ -82,91 +70,6 @@ function createOrientationControls(camera) {
 	controls.connect();
 	controls.update();
 	return controls;
-}
-
-function drawStar() {
-	const light = new THREE.PointLight(0xffffff, 1.4, 2800);
-	light.position.set(300, 300, -900);
-	window.star = light;
-	return light;
-}
-
-function drawLandscape(renderer) {
-	const texture = THREE.ImageUtils.loadTexture(
-		'textures/patterns/sand.png'
-	);
-	texture.wrapS = THREE.RepeatWrapping;
-	texture.wrapT = THREE.RepeatWrapping;
-	texture.repeat = new THREE.Vector2(90, 90);
-	texture.anisotropy = renderer.getMaxAnisotropy();
-
-	const material = new THREE.MeshLambertMaterial({
-		color: 0xffffff,
-		specular: 0xffffff,
-		shininess: 20,
-		shading: THREE.FlatShading,
-		map: texture
-	});
-
-	const geometry = new THREE.PlaneGeometry(1000, 1000);
-
-	const landscapeMesh = new THREE.Mesh(geometry, material);
-	landscapeMesh.rotation.x = -Math.PI / 2;
-	return landscapeMesh;
-}
-
-function drawSkyBox() {
-	// Load the skybox images and create list of materials
-	const materials = [
-		createMaterial('textures/skybox/skyX55+x.png'), // right
-		createMaterial('textures/skybox/skyX55-x.png'), // left
-		createMaterial('textures/skybox/skyX55+y.png'), // top
-		createMaterial('textures/skybox/skyX55-y.png'), // bottom
-		createMaterial('textures/skybox/skyX55+z.png'), // back
-		createMaterial('textures/skybox/skyX55-z.png')  // front
-	];
-	// Create a large cube
-	const mesh = new THREE.Mesh(
-		new THREE.BoxGeometry(800, 800, 800, 1, 1, 1),
-		new THREE.MeshFaceMaterial(materials)
-	);
-	// Set the x scale to be -1, this will turn the cube inside out
-	mesh.scale.set(-1, 1, 1);
-	return mesh;
-}
-
-function createMaterial(path) {
-	const texture = THREE.ImageUtils.loadTexture(path);
-	const material = new THREE.MeshBasicMaterial({map: texture, overdraw: 0.5});
-	return material;
-}
-
-function drawLine(a, b) {
-	const material = new THREE.LineBasicMaterial({color: 0x00ff00});
-	const geometry = new THREE.Geometry();
-	const line = new THREE.Line(geometry, material);
-	geometry.vertices.push(new THREE.Vector3(...a));
-	geometry.vertices.push(new THREE.Vector3(...b));
-	return line;
-}
-
-function drawBox() {
-	const geometry = new THREE.BoxGeometry(3, 3, 3);
-	const texture = THREE.ImageUtils.loadTexture(
-		'textures/patterns/checker.png'
-	);
-
-	const material = new THREE.MeshPhongMaterial({
-		color: 0xffffff,
-		specular: 0xffffff,
-		shininess: 20,
-		shading: THREE.FlatShading,
-		map: texture
-	});
-	const mesh = new THREE.Mesh(geometry, material);
-	mesh.translateOnAxis(new THREE.Vector3(10, 5, 0), 1);
-	mesh.rotateY(15);
-	return mesh;
 }
 
 function checkForMobile() {
