@@ -1,27 +1,30 @@
 import P2P from 'socket.io-p2p';
 import io from 'socket.io-client';
+import NoSleep from 'nosleep.js';
 import startVR from './vr';
 import landscape from './objects/landscape';
-import line from './objects/line';
 import box from './objects/box';
 import mobileControls from './controls/mobile';
+import desktopControls from './controls/desktop';
 import setQuaternion from './controls/utils/quaterion';
 import fullscreen from './controls/utils/fullscreen';
 
+const noSleep = new NoSleep();
 const socket = io(`${window.location.protocol}//${window.location.hostname}:3050`);
 const p2p = new P2P(socket);
 p2p.usePeerConnection = true;
 
-
 const vr = startVR();
+const cursor = box();
 vr.addToScene(landscape(vr.anisotropy));
-vr.addToScene(line([10, 10, 0], [10, 12, 0]));
-vr.addToScene(line([10, 11, -1], [10, 11, 1]));
-vr.addToScene(box());
+vr.addToScene(cursor);
+window.camera = vr.camera;
 
 p2p.on('set-camera-orientation', (orientation) => {
 	setQuaternion(vr.camera.quaternion, orientation);
 });
+p2p.on('move-camera', moveCamera);
+p2p.on('move-cursor', moveCursor);
 
 if (isMobile()) {
 	const controls = mobileControls();
@@ -33,10 +36,32 @@ if (isMobile()) {
 	vr.enableStereo();
 	vr.container.addEventListener('click', () => {
 		fullscreen(vr.container);
+		noSleep.enable();
 	});
 } else {
-	//
+	const controls = desktopControls();
+	controls.cameraMove.subscribe((move) => {
+		moveCamera(move);
+		p2p.emit('move-camera', move);
+	});
+	controls.cursorMove.subscribe((move) => {
+		moveCursor(move);
+		p2p.emit('move-cursor', move);
+	});
 }
+
+function moveCamera(move) {
+	vr.camera.translateX(move.x);
+	vr.camera.translateY(move.y);
+	vr.camera.translateZ(move.z);
+}
+
+function moveCursor(move) {
+	cursor.translateX(move.x);
+	cursor.translateZ(move.y);
+	cursor.translateY(move.z);
+}
+
 vr.resize();
 window.addEventListener('resize', vr.resize);
 

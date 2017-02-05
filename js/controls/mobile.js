@@ -1,8 +1,8 @@
 import observable from '../lib/observable';
 
-const orientationSubscribers = observable();
 
 export default function mobileControls() {
+	const orientationSubscribers = observable();
 	const orientation = {
 		alpha: 0,
 		beta: 0,
