@@ -33,12 +33,12 @@ if (isMobile()) {
 	vr.enableStereo();
 	vr.container.addEventListener('click', () => {
 		fullscreen(vr.container);
-		window.setTimeout(vr.resize, 1000);
 	});
 } else {
 	//
 }
 vr.resize();
+window.addEventListener('resize', vr.resize);
 
 function isMobile() {
 	return /android/i.test(navigator.userAgent);

@@ -1,7 +1,6 @@
 import observable from '../lib/observable';
 
 const orientationSubscribers = observable();
-const fullscreenSubscribers = observable();
 
 export default function mobileControls() {
 	const orientation = {
@@ -19,11 +18,6 @@ export default function mobileControls() {
 	function disable() {
 		window.removeEventListener('orientationchange', updateScreenOrientation);
 		window.removeEventListener('deviceorientation', updateDeviceOrientation);
-	}
-
-	function setFullscreen() {
-		fullscreen();
-		fullscreenSubscribers.notify();
 	}
 
 	function updateDeviceOrientation(e) {
