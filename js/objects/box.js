@@ -1,6 +1,6 @@
 export default function box() {
 	const geometry = new THREE.BoxGeometry(3, 3, 3);
-	const texture = THREE.ImageUtils.loadTexture(
+	const texture = new THREE.TextureLoader().load(
 		'textures/patterns/checker.png'
 	);
 

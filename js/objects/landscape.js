@@ -18,7 +18,7 @@ function skyBox() {
 	// Create a large cube
 	const skyBoxMesh = new THREE.Mesh(
 		new THREE.BoxGeometry(800, 800, 800, 1, 1, 1),
-		new THREE.MeshFaceMaterial(materials)
+		new THREE.MultiMaterial(materials)
 	);
 	// Set the x scale to be -1, this will turn the cube inside out
 	skyBoxMesh.scale.set(-1, 1, 1);
@@ -26,13 +26,13 @@ function skyBox() {
 }
 
 function createMaterial(path) {
-	const texture = THREE.ImageUtils.loadTexture(path);
+	const texture = new THREE.TextureLoader().load(path);
 	const material = new THREE.MeshBasicMaterial({map: texture, overdraw: 0.5});
 	return material;
 }
 
 function surface(anisotropy) {
-	const texture = THREE.ImageUtils.loadTexture(
+	const texture = new THREE.TextureLoader().load(
 		'textures/patterns/sand.png'
 	);
 	texture.wrapS = THREE.RepeatWrapping;
@@ -42,8 +42,6 @@ function surface(anisotropy) {
 
 	const material = new THREE.MeshLambertMaterial({
 		color: 0xffffff,
-		specular: 0xffffff,
-		shininess: 20,
 		shading: THREE.FlatShading,
 		map: texture
 	});
