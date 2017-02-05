@@ -1,7 +1,4 @@
-import {CONTAINER_ID} from '../../constants';
-
-export default function fullscreen() {
-	const container = window.document.getElementById(CONTAINER_ID);
+export default function fullscreen(container) {
 	if (container.requestFullscreen) {
 		container.requestFullscreen();
 	} else if (container.msRequestFullscreen) {

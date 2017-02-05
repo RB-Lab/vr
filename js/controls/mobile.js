@@ -1,7 +1,7 @@
 import observable from '../lib/observable';
-import fullscreen from './utils/fullscreen';
 
-const subscribers = observable();
+const orientationSubscribers = observable();
+const fullscreenSubscribers = observable();
 
 export default function mobileControls() {
 	const orientation = {
@@ -14,25 +14,28 @@ export default function mobileControls() {
 	function enable() {
 		window.addEventListener('orientationchange', updateScreenOrientation);
 		window.addEventListener('deviceorientation', updateDeviceOrientation);
-		window.addEventListener('click', fullscreen);
 	}
 
 	function disable() {
 		window.removeEventListener('orientationchange', updateScreenOrientation);
 		window.removeEventListener('deviceorientation', updateDeviceOrientation);
-		window.removeEventListener('click', fullscreen);
+	}
+
+	function setFullscreen() {
+		fullscreen();
+		fullscreenSubscribers.notify();
 	}
 
 	function updateDeviceOrientation(e) {
 		orientation.alpha = getAngele(e.alpha);  // Z
 		orientation.beta = getAngele(e.beta);  // X'
 		orientation.gamma = getAngele(e.gamma);  // Y''
-		subscribers.notify(orientation);
+		orientationSubscribers.notify(orientation);
 	}
 
 	function updateScreenOrientation() {
 		orientation.orientation = getAngele(screen.orientation.angle || 0);
-		subscribers.notify(orientation);
+		orientationSubscribers.notify(orientation);
 	}
 
 	function getAngele(rawAngle) {
@@ -42,7 +45,7 @@ export default function mobileControls() {
 	return {
 		enable,
 		disable,
-		subscribe: subscribers.subscribe,
-		unsubscribe: subscribers.unsubscribe
+		subscribe: orientationSubscribers.subscribe,
+		unsubscribe: orientationSubscribers.unsubscribe
 	};
 }

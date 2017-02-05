@@ -6,6 +6,7 @@ import line from './objects/line';
 import box from './objects/box';
 import mobileControls from './controls/mobile';
 import setQuaternion from './controls/utils/quaterion';
+import fullscreen from './controls/utils/fullscreen';
 
 const socket = io(`${window.location.protocol}//${window.location.hostname}:3050`);
 const p2p = new P2P(socket);
@@ -30,6 +31,10 @@ if (isMobile()) {
 		p2p.emit('set-camera-orientation', orientation);
 	});
 	vr.enableStereo();
+	vr.container.addEventListener('click', () => {
+		fullscreen(vr.container);
+		window.setTimeout(vr.resize, 1000);
+	});
 } else {
 	//
 }
