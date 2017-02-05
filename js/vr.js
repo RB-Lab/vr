@@ -1,3 +1,5 @@
+import orientationControls from './controls/mobile';
+
 const env = {
 	clock: new THREE.Clock(),
 	camera: new THREE.PerspectiveCamera(90, 1, 0.001, 700),
@@ -66,7 +68,7 @@ function createOrbitControls(camera, element) {
 }
 
 function createOrientationControls(camera) {
-	const controls = new THREE.DeviceOrientationControls(camera, true);
+	const controls = orientationControls(camera);
 	controls.connect();
 	controls.update();
 	return controls;
