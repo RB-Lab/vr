@@ -20,3 +20,19 @@ window.addEventListener('mousemove', (e) => {
 	lastXY.x = e.clientX;
 	lastXY.y = e.clientY;
 });
+
+function createOrbitControls(camera, element) {
+	const controls = new THREE.OrbitControls(camera, element);
+	controls.target.set(
+		camera.position.x + 1,
+		camera.position.y,
+		camera.position.z
+	);
+	controls.noZoom = true;
+	controls.noPan = true;
+	return controls;
+}
+
+const controls = createOrbitControls(env.camera, env.element);
+window.addEventListener('resize', resize, false);
+setTimeout(resize, 1);

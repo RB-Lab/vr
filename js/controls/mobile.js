@@ -1,53 +1,48 @@
-import setObjectQuaternion from './helpers/quaterion';
+import observable from '../lib/observable';
+import fullscreen from './utils/fullscreen';
 
-// TODO make orientation observable, then subscribe camera on it and send it via p2p
+const subscribers = observable();
 
-export default function orientationControls(camera) {
-	camera.rotation.reorder('YXZ');
-	let deviceOrientation = {};
-	let screenOrientation = 0;
-	let enabled = false;
+export default function mobileControls() {
+	const orientation = {
+		alpha: 0,
+		beta: 0,
+		gamma: 0,
+		orientation: 0
+	};
 
-	function onDeviceOrientationChange(event) {
-		deviceOrientation = event;
+	function enable() {
+		window.addEventListener('orientationchange', updateScreenOrientation);
+		window.addEventListener('deviceorientation', updateDeviceOrientation);
+		window.addEventListener('click', fullscreen);
 	}
 
-	function onScreenOrientationChange() {
-		screenOrientation = window.orientation || 0;
+	function disable() {
+		window.removeEventListener('orientationchange', updateScreenOrientation);
+		window.removeEventListener('deviceorientation', updateDeviceOrientation);
+		window.removeEventListener('click', fullscreen);
 	}
 
-	function connect() {
-		onScreenOrientationChange(); // run once on load
-		window.addEventListener('orientationchange', onScreenOrientationChange, false);
-		window.addEventListener('deviceorientation', onDeviceOrientationChange, false);
-		enabled = true;
+	function updateDeviceOrientation(e) {
+		orientation.alpha = getAngele(e.alpha);  // Z
+		orientation.beta = getAngele(e.beta);  // X'
+		orientation.gamma = getAngele(e.gamma);  // Y''
+		subscribers.notify(orientation);
 	}
 
-	function disconnect() {
-		window.removeEventListener('orientationchange', onScreenOrientationChange, false);
-		window.removeEventListener('deviceorientation', onDeviceOrientationChange, false);
-		enabled = false;
-	}
-
-	function update() {
-		if (enabled === false) return;
-		const alpha = getAngele(deviceOrientation.alpha);  // Z;
-		const beta = getAngele(deviceOrientation.beta); // X';
-		const gamma = getAngele(deviceOrientation.gamma); // Y'';
-		const orient = getAngele(screenOrientation); // O
-
-		setObjectQuaternion(camera.quaternion, alpha, beta, gamma, orient);
+	function updateScreenOrientation() {
+		orientation.orientation = getAngele(screen.orientation.angle || 0);
+		subscribers.notify(orientation);
 	}
 
 	function getAngele(rawAngle) {
 		return rawAngle ? THREE.Math.degToRad(rawAngle) : 0;
 	}
 
-	connect();
-
 	return {
-		connect,
-		update,
-		disconnect
+		enable,
+		disable,
+		subscribe: subscribers.subscribe,
+		unsubscribe: subscribers.unsubscribe
 	};
 }

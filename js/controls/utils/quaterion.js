@@ -7,7 +7,7 @@ const q0 = new THREE.Quaternion();
 // - PI/2 around the x-axis
 const q1 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5));
 
-export default function setObjectQuaternion(quaternion, alpha, beta, gamma, orient) {
+export default function setQuaternion(quaternion, {alpha, beta, gamma, orientation}) {
 	// 'ZXY' for the device, but 'YXZ' for us
 	euler.set(beta, alpha, -gamma, 'YXZ');
 	// orient the device
@@ -15,5 +15,5 @@ export default function setObjectQuaternion(quaternion, alpha, beta, gamma, orie
 	// camera looks out the back of the device, not the top
 	quaternion.multiply(q1);
 	// adjust for screen orientation
-	quaternion.multiply(q0.setFromAxisAngle(zee, -orient));
+	quaternion.multiply(q0.setFromAxisAngle(zee, -orientation));
 }
