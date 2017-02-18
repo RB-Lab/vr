@@ -4,6 +4,7 @@ import NoSleep from 'nosleep.js';
 import startVR from './vr';
 import landscape from './objects/landscape';
 import box from './objects/box';
+import line from './objects/line';
 import mobileControls from './controls/mobile';
 import desktopControls from './controls/desktop';
 import setQuaternion from './controls/utils/quaterion';
@@ -15,10 +16,11 @@ const p2p = new P2P(socket);
 p2p.usePeerConnection = true;
 
 const vr = startVR();
-const cursor = box();
-vr.addToScene(landscape(vr.anisotropy));
-vr.addToScene(cursor);
-window.camera = vr.camera;
+const object = box();
+const terrain = landscape(vr.anisotropy);
+vr.addToScene(terrain);
+vr.addToScene(object);
+
 
 p2p.on('set-camera-orientation', (orientation) => {
 	setQuaternion(vr.camera.quaternion, orientation);
@@ -54,12 +56,39 @@ function moveCamera(move) {
 	vr.camera.translateX(move.x);
 	vr.camera.translateY(move.y);
 	vr.camera.translateZ(move.z);
+	updateLaserPosition();
 }
 
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let laser = null;
+const cameraShift = {x: 0, y: -1, z: -1};
 function moveCursor(move) {
-	cursor.translateX(move.x);
-	cursor.translateZ(move.y);
-	cursor.translateY(move.z);
+	mouse.x = move.x;
+	mouse.y = move.y;
+	updateLaserPosition();
+}
+
+function updateLaserPosition() {
+	raycaster.setFromCamera(mouse, vr.camera);
+	const inte = raycaster.intersectObjects(terrain);
+	if (inte.length) {
+		if (!laser) {
+			laser = line(shiftIt(vr.camera.position, cameraShift), inte[0].point);
+			window.laser = laser;
+			vr.addToScene(laser.line);
+		} else {
+			laser.update(shiftIt(vr.camera.position, cameraShift), inte[0].point);
+		}
+	}
+}
+
+function shiftIt(position, shift) {
+	return {
+		x: position.x + shift.x,
+		y: position.y + shift.y,
+		z: position.z + shift.z
+	};
 }
 
 vr.resize();

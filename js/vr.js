@@ -38,6 +38,7 @@ function startVR() {
 			} else {
 				scene.add(objects);
 			}
+			render();
 		},
 		resize() {
 			const width = container.offsetWidth;

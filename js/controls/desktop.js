@@ -8,7 +8,6 @@ export default function desktopControls() {
 	const cameraMoveSubscribers = observable();
 	const cursorMoveSubscribers = observable();
 
-	let middleButtonFlag = false;
 	window.addEventListener('keydown', (e) => {
 		if (e.keyCode === KEY_CODES.LEFT_ARROW) {
 			cameraMoveSubscribers.notify(Object.assign({}, defaultMove, {x: -1}));
@@ -23,27 +22,13 @@ export default function desktopControls() {
 			cameraMoveSubscribers.notify(Object.assign({}, defaultMove, {z: -1}));
 		}
 	});
-	window.addEventListener('mousedown', (e) => {
-		if (e.which === 2) {
-			middleButtonFlag = true;
-		}
-	});
-
-	window.addEventListener('mouseup', (e) => {
-		if (e.which === 2) {
-			middleButtonFlag = false;
-		}
-	});
 
 	const lastXYZ = {};
 	window.addEventListener('mousemove', (e) => {
-		if ('x' in lastXYZ && 'y' in lastXYZ && middleButtonFlag) {
-			cursorMoveSubscribers.notify({
-				x: (lastXYZ.x - e.clientX) * CURSOR_FACTOR,
-				y: (lastXYZ.y - e.clientY) * CURSOR_FACTOR,
-				z: 0
-			});
-		}
+		cursorMoveSubscribers.notify({
+			x: ((e.clientX / window.innerWidth) * 2) - 1,
+			y: -((e.clientY / window.innerHeight) * 2) + 1
+		});
 		lastXYZ.x = e.clientX;
 		lastXYZ.y = e.clientY;
 	});
