@@ -26,6 +26,8 @@ export default function desktopControls() {
 	const lastXYZ = {};
 	window.addEventListener('mousemove', (e) => {
 		cursorMoveSubscribers.notify({
+			// got no idea of those numbers,
+			// see here: https://threejs.org/docs/api/core/Raycaster.html
 			x: ((e.clientX / window.innerWidth) * 2) - 1,
 			y: -((e.clientY / window.innerHeight) * 2) + 1
 		});

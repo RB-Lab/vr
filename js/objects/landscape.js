@@ -5,30 +5,14 @@ function star() {
 	return starLight;
 }
 
-function skyBox() {
-	// Load the skybox images and create list of materials
-	const materials = [
-		createMaterial('textures/skybox/skyX55+x.png'), // right
-		createMaterial('textures/skybox/skyX55-x.png'), // left
-		createMaterial('textures/skybox/skyX55+y.png'), // top
-		createMaterial('textures/skybox/skyX55-y.png'), // bottom
-		createMaterial('textures/skybox/skyX55+z.png'), // back
-		createMaterial('textures/skybox/skyX55-z.png')  // front
-	];
-	// Create a large cube
-	const skyBoxMesh = new THREE.Mesh(
-		new THREE.BoxGeometry(800, 800, 800, 1, 1, 1),
-		new THREE.MultiMaterial(materials)
-	);
-	// Set the x scale to be -1, this will turn the cube inside out
-	skyBoxMesh.scale.set(-1, 1, 1);
-	return skyBoxMesh;
-}
-
-function createMaterial(path) {
-	const texture = new THREE.TextureLoader().load(path);
-	const material = new THREE.MeshBasicMaterial({map: texture, overdraw: 0.5});
-	return material;
+function skyDome() {
+	const geometry = new THREE.SphereGeometry(300, 300, 300);
+	const material = new THREE.MeshBasicMaterial({
+		map: new THREE.TextureLoader().load('textures/skybox/sky3.jpg')
+	});
+	const mesh = new THREE.Mesh(geometry, material);
+	mesh.material.side = THREE.DoubleSide;
+	return mesh;
 }
 
 function surface(anisotropy) {
@@ -56,7 +40,7 @@ export default function createLadscapeObjects(anisotropy) {
 	return [
 		star(),
 		new THREE.AmbientLight(0x505050),
-		skyBox(),
+		skyDome(),
 		surface(anisotropy)
 	];
 }

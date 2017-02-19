@@ -20,6 +20,7 @@ function startVR() {
 	container.appendChild(element);
 	camera.position.set(0, 10, 0);
 	scene.add(camera);
+	window.scene = scene;
 	render = () => renderer.render(scene, camera);
 	animate();
 
